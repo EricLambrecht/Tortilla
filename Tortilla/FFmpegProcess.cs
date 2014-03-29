@@ -7,7 +7,7 @@ namespace Makhani.Tortilla
 {
 	public class FFmpegProcess
 	{
-		public List<string> Output { get; }
+		public List<string> Output { get; private set; }
 		protected Process process;
 
 		public FFmpegProcess ()
@@ -87,6 +87,11 @@ namespace Makhani.Tortilla
 		// In Pixels
 		int Width;
 		int Height;
+
+		public Resolution(int width, int height) {
+			this.Width = width;
+			this.Height = height;
+		}
 
 		public override string ToString() {
 			return string.Format ("{0}x{1}", Width, Height);
