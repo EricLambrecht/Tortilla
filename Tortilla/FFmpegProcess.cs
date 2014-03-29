@@ -14,7 +14,7 @@ namespace Makhani.Tortilla
 		{
 		}
 
-		public void Run(string arguments) 
+		public void Start(string arguments) 
 		{
 			process = new Process();
 			// Configure the process using the StartInfo properties.
@@ -25,6 +25,11 @@ namespace Makhani.Tortilla
 			process.OutputDataReceived += OnDataReceived;
 			process.Start();
 			process.WaitForExit ();// Waits here for the process to exit.
+		}
+
+		public void Run(string arguments) {
+			Start (arguments);
+			// TODO: Dont restart process every time, instead give new arguments..
 		}
 
 		public void CaptureLinuxScreen () 
@@ -39,7 +44,7 @@ namespace Makhani.Tortilla
 			Run (args); 
 		}
 
-		public void StreamToUrl(string url, Resolution inputResolution, Resolution outputResolution) 
+		public void StreamVideoToUrl(string url, Resolution inputResolution, Resolution outputResolution) 
 		{
 			// ffmpeg -f dshow -i video="screen-capture-recorder":audio="Stereo Mix (IDT High Definition)" -vcodec libx264 -preset ultrafast -tune zerolatency -r 10 -async 1 -acodec libmp3lame -ab 24k -ar 22050 -bsf:v h264_mp4toannexb -maxrate 750k -bufsize 3000k -f mpegts udp://192.168.5.215:48550
 
@@ -51,6 +56,11 @@ namespace Makhani.Tortilla
 					url
 				);
 			Run(args);
+		}
+
+		public void StreamAudioViaRTP(string url) {
+			string args = "-re -f lavfi -i aevalsrc=\"sin(400*2*PI*t)\" -ar 8000 -f mulaw -f rtp rtp://127.0.0.1:1234";
+			Run (args);
 		}
 			
 		// This function is windows only!
@@ -68,6 +78,7 @@ namespace Makhani.Tortilla
 
 		public void End() 
 		{
+			process.Dispose ();
 			process.Kill ();
 		}
 	}
