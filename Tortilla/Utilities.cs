@@ -1,10 +1,13 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 
 namespace Makhani
 {
-	public static class Utilities
+	public static class Environment
 	{
+		public static string ApplicationPath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+
 		public enum OS
 		{
 			Win,
@@ -14,7 +17,7 @@ namespace Makhani
 
 		public static OS GetOS()
 		{
-			switch (Environment.OSVersion.Platform)
+			switch (System.Environment.OSVersion.Platform)
 			{
 			case PlatformID.Unix:
 				// Well, there are chances MacOSX is reported as Unix instead of MacOSX.

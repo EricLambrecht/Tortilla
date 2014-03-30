@@ -35,7 +35,8 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities.cs" />
-    <Compile Include="FFmpegProcess.cs" />
+    <Compile Include="Tortilla.cs" />
+    <Compile Include="FFmpegManager.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
