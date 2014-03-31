@@ -38,7 +38,7 @@ namespace Makhani.Tortilla
 			FFmpegProcess.ErrorDataReceived += OnDataReceived;
 		}
 
-		public async Task<bool> StreamWindowsScreenToIp (string videoDeviceName, string audioDeviceName, string ip, StreamingMode mode, int frameRate = 25, int quality = 20) 
+		public async Task<bool> StreamWindowsScreenToIpAsync (string videoDeviceName, string audioDeviceName, string ip, StreamingMode mode, int frameRate = 25, int quality = 20) 
 		{
 			// var tcs = new TaskCompletionSource<bool> ();
 
