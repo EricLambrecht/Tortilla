@@ -38,9 +38,9 @@ namespace Makhani.Tortilla
 			FFmpegProcess.ErrorDataReceived += OnDataReceived;
 		}
 
-		public Task StreamWindowsScreenToIp (string videoDeviceName, string audioDeviceName, string ip, StreamingMode mode, int frameRate = 25, int quality = 20) 
+		public async Task<bool> StreamWindowsScreenToIp (string videoDeviceName, string audioDeviceName, string ip, StreamingMode mode, int frameRate = 25, int quality = 20) 
 		{
-			var tcs = new TaskCompletionSource<bool> ();
+			// var tcs = new TaskCompletionSource<bool> ();
 
 			string input = string.Format(
 				"-f dshow  -i video=\"{0}\":audio=\"{1}\" -r {2} -vcodec mpeg4 -q {3} -acodec libmp3lame -ab 128k",
@@ -52,14 +52,17 @@ namespace Makhani.Tortilla
 
 			FFmpegProcess = FFmpegManager.GetFFmpegProcess(args);
 			FFmpegProcess.ErrorDataReceived += OnDataReceived;
-			FFmpegProcess.Exited += (sender, e) => {
-				tcs.SetResult(true);
-				FFmpegProcess.Dispose();
-			};
+//			FFmpegProcess.Exited += (sender, e) => {
+//				try { tcs.SetResult(true); }
+//				catch(Exception exc) { tcs.SetException(exc); }
+//				finally { FFmpegProcess.Dispose(); }
+//			};
 
 			FFmpegProcess.Start ();
+			await Task.Run(() => FFmpegProcess.WaitForExit ());
+			return true;
 
-			return tcs.Task;
+			//return tcs.Task;
 		}
 
 		public void StreamVideoToUrl(string url, Resolution inputResolution, Resolution outputResolution) 
@@ -81,6 +84,20 @@ namespace Makhani.Tortilla
 			FFmpegProcess.ErrorDataReceived += OnDataReceived;
 
 			// TODO: get stream with "ffplay rtp://127.0.0.1:1234"
+		}
+
+		public async Task<bool> LogFFmpegOutput() 
+		{
+			var outputStream = FFmpegProcess.StandardError;
+			using (var fileStream = File.Create(Makhani.Environment.ApplicationPath + "\\output.log")) {
+				using (var fileWriter = new StreamWriter (fileStream)) {
+					while (!outputStream.EndOfStream) {
+						string line = outputStream.ReadLine ();
+						fileWriter.WriteLine (line);
+					}
+					return true;
+				}
+			}
 		}
 			
 		// This function is windows only!
@@ -129,6 +146,14 @@ namespace Makhani.Tortilla
 					}
 				}
 			}
+		}
+
+		public void SendInputToFFmpegProcess(char ch) {
+			FFmpegProcess.StandardInput.Write (ch);
+		}
+
+		public void SendInputToFFmpegProcess(string str) {
+			FFmpegProcess.StandardInput.WriteLine(str);
 		}
 
 		protected void OnDataReceived(object sender, DataReceivedEventArgs received) 

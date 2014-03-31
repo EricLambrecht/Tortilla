@@ -2,9 +2,9 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Tortilla\FFmpegManager.cs">
     <Files>
-      <File FileName="Tortilla\Tortilla.cs" Line="41" Column="11" />
+      <File FileName="Tortilla\Tortilla.cs" Line="61" Column="27" />
       <File FileName="Tortilla\Utilities.cs" Line="1" Column="1" />
-      <File FileName="Tortilla\FFmpegManager.cs" Line="24" Column="20" />
+      <File FileName="Tortilla\FFmpegManager.cs" Line="46" Column="45" />
       <File FileName="Tortilla\MiscStructsAndEnums.cs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
