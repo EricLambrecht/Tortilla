@@ -18,6 +18,26 @@ namespace Makhani.Tortilla
 		public static Process RunFFmpegProcess (string arguments, string path)
 		{
 			try {
+				var process = GetFFmpegProcess(arguments, path);
+				process.Start();
+				process.WaitForExit();
+				return process;
+			}
+			catch(FileNotFoundException e) {
+				throw new FileNotFoundException (e.Message + " " + path, e);
+			}
+			catch(System.ComponentModel.Win32Exception e) {
+				throw new FileNotFoundException (e.Message + " " + path, e);
+			}
+		}
+
+		public static Process GetFFmpegProcess (string arguments) {
+			return GetFFmpegProcess (arguments, FFmpegDefaultPath);
+		}
+
+		public static Process GetFFmpegProcess (string arguments, string path)
+		{
+			try {
 				Process process = new Process();
 				// Configure the process using the StartInfo properties.
 				process.StartInfo.FileName = Path.Combine(FFmpegDefaultPath, "ffmpeg.exe");
@@ -26,9 +46,9 @@ namespace Makhani.Tortilla
 				process.StartInfo.UseShellExecute = false;
 				process.StartInfo.RedirectStandardOutput = true;
 				process.StartInfo.RedirectStandardError = true;
+				process.StartInfo.RedirectStandardInput = true;
 				process.StartInfo.WorkingDirectory = path;
-				process.Start();
-				process.WaitForExit ();// Waits here for the process to exit.
+				process.EnableRaisingEvents = true;
 				return process;
 			}
 			catch(FileNotFoundException e) {

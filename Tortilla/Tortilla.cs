@@ -2,6 +2,7 @@
 using System.IO;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Makhani.Tortilla
 {
@@ -37,8 +38,10 @@ namespace Makhani.Tortilla
 			FFmpegProcess.ErrorDataReceived += OnDataReceived;
 		}
 
-		public void StreamWindowsScreenToIp (string videoDeviceName, string audioDeviceName, string ip, StreamingMode mode, int frameRate = 25, int quality = 20) 
+		public Task StreamWindowsScreenToIp (string videoDeviceName, string audioDeviceName, string ip, StreamingMode mode, int frameRate = 25, int quality = 20) 
 		{
+			var tcs = new TaskCompletionSource<bool> ();
+
 			string input = string.Format(
 				"-f dshow  -i video=\"{0}\":audio=\"{1}\" -r {2} -vcodec mpeg4 -q {3} -acodec libmp3lame -ab 128k",
 				videoDeviceName, audioDeviceName, frameRate.ToString(), quality.ToString()
@@ -47,8 +50,16 @@ namespace Makhani.Tortilla
 
 			string args = input + " " + output;
 
-			FFmpegProcess = FFmpegManager.RunFFmpegProcess(args);
+			FFmpegProcess = FFmpegManager.GetFFmpegProcess(args);
 			FFmpegProcess.ErrorDataReceived += OnDataReceived;
+			FFmpegProcess.Exited += (sender, e) => {
+				tcs.SetResult(true);
+				FFmpegProcess.Dispose();
+			};
+
+			FFmpegProcess.Start ();
+
+			return tcs.Task;
 		}
 
 		public void StreamVideoToUrl(string url, Resolution inputResolution, Resolution outputResolution) 
