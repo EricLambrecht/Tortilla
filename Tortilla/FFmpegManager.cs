@@ -11,7 +11,11 @@ namespace Makhani.Tortilla
 	{
 		public static string FFmpegDefaultPath = Path.Combine(Makhani.Environment.ApplicationPath, "ffmpeg\\bin");
 
-		public static Process RunFFmpegProcess (string arguments, DataReceivedEventHandler handler, string path)
+		public static Process RunFFmpegProcess (string arguments) {
+			return RunFFmpegProcess (arguments, FFmpegDefaultPath);
+		}
+
+		public static Process RunFFmpegProcess (string arguments, string path)
 		{
 			try {
 				Process process = new Process();
@@ -23,7 +27,6 @@ namespace Makhani.Tortilla
 				process.StartInfo.RedirectStandardOutput = true;
 				process.StartInfo.RedirectStandardError = true;
 				process.StartInfo.WorkingDirectory = path;
-				process.OutputDataReceived += handler;
 				process.Start();
 				process.WaitForExit ();// Waits here for the process to exit.
 				return process;
@@ -36,14 +39,10 @@ namespace Makhani.Tortilla
 			}
 		}
 
-		public static Process RunFFmpegProcess (string arguments, DataReceivedEventHandler handler) {
-			return RunFFmpegProcess (arguments, handler, FFmpegDefaultPath);
-		}
-
 		public static bool IsInstalled() {
 			switch (Makhani.Environment.GetOS ()) {
 			case Makhani.Environment.OS.Win:
-				string path = Path.GetFullPath (Path.PathSeparator + "ffmpeg" + Path.PathSeparator + "ffmpeg.exe");
+				string path = Path.Combine (FFmpegDefaultPath, "ffmpeg.exe");
 				if (File.Exists (path)) {
 					return true;
 				} else {

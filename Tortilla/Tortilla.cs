@@ -11,20 +11,9 @@ namespace Makhani.Tortilla
 		public List<string> AudioDevices { get; private set; }
 		public List<string> VideoDevices { get; private set; }
 		public Process FFmpegProcess{ get; private set; }
+		public event DataReceivedEventHandler OutputReceived;
 
-		enum StreamingMode {
-			UDP,
-			RTP
-		}
 
-		enum AudioCodec {
-			LameMP3,
-			WMA
-		}
-
-		enum VideoCodec {
-			Mpeg4
-		}
 
 		public Tortilla ()
 		{
@@ -37,13 +26,15 @@ namespace Makhani.Tortilla
 		public void CaptureLinuxScreen (Resolution inputResolution, int frameRate) 
 		{
 			string args = string.Format("-video_size {0} -framerate {1} -f x11grab -i :0.0+100,200 -f alsa -ac 2 -i pulse output.flv", inputResolution, frameRate.ToString());
-			FFmpegProcess = FFmpegManager.RunFFmpegProcess(args, OnDataReceived);
+			FFmpegProcess = FFmpegManager.RunFFmpegProcess(args);
+			FFmpegProcess.ErrorDataReceived += OnDataReceived;
 		}
 
 		public void CaptureWindowsScreen (string audioDeviceName) 
 		{
 			string args = string.Format("-f dshow -i video=\"UScreenCapture\":audio=\"{0}\" output.flv", audioDeviceName);
-			FFmpegProcess = FFmpegManager.RunFFmpegProcess(args, OnDataReceived);
+			FFmpegProcess = FFmpegManager.RunFFmpegProcess(args);
+			FFmpegProcess.ErrorDataReceived += OnDataReceived;
 		}
 
 		public void StreamWindowsScreenToIp (string videoDeviceName, string audioDeviceName, string ip, StreamingMode mode, int frameRate = 25, int quality = 20) 
@@ -56,7 +47,8 @@ namespace Makhani.Tortilla
 
 			string args = input + " " + output;
 
-			FFmpegProcess = FFmpegManager.RunFFmpegProcess(args, OnDataReceived);
+			FFmpegProcess = FFmpegManager.RunFFmpegProcess(args);
+			FFmpegProcess.ErrorDataReceived += OnDataReceived;
 		}
 
 		public void StreamVideoToUrl(string url, Resolution inputResolution, Resolution outputResolution) 
@@ -67,13 +59,15 @@ namespace Makhani.Tortilla
 					"-f x11grab -s {0} -r 15 -i :0.0 -c:v libx264 -preset fast -pix_fmt yuv420p -s {1} -threads 0 -f flv \"{2}\"", 
 					inputResolution, outputResolution, url
 				);
-			FFmpegProcess = FFmpegManager.RunFFmpegProcess(args, OnDataReceived);
+			FFmpegProcess = FFmpegManager.RunFFmpegProcess(args);
+			FFmpegProcess.ErrorDataReceived += OnDataReceived;
 		}
 
 		public void StreamAudioViaRTP(string url)
 		{
 			string args = "-re -f lavfi -i aevalsrc=\"sin(400*2*PI*t)\" -ar 8000 -f mulaw -f rtp rtp://127.0.0.1:1234";
-			FFmpegProcess = FFmpegManager.RunFFmpegProcess(args, OnDataReceived);
+			FFmpegProcess = FFmpegManager.RunFFmpegProcess(args);
+			FFmpegProcess.ErrorDataReceived += OnDataReceived;
 
 			// TODO: get stream with "ffplay rtp://127.0.0.1:1234"
 		}
@@ -83,7 +77,8 @@ namespace Makhani.Tortilla
 		{
 			//ffmpeg -list_devices true -f dshow -i dummy
 			string args = "-list_devices true -f dshow -i dummy";
-			FFmpegProcess = FFmpegManager.RunFFmpegProcess(args, OnDataReceived);
+			FFmpegProcess = FFmpegManager.RunFFmpegProcess(args);
+			FFmpegProcess.ErrorDataReceived += OnDataReceived;
 			var outputStream = FFmpegProcess.StandardError;
 
 			using (var fileStream = File.Create(Makhani.Environment.ApplicationPath + "\\devices.log")) {
@@ -128,6 +123,10 @@ namespace Makhani.Tortilla
 		protected void OnDataReceived(object sender, DataReceivedEventArgs received) 
 		{
 			Output.Add (received.Data);
+			DataReceivedEventHandler tmpHandler = OutputReceived;
+			if (tmpHandler != null) {
+				tmpHandler (this, received);
+			}
 		}
 
 		public void KillProcess(Process process) 
@@ -136,21 +135,6 @@ namespace Makhani.Tortilla
 			process.Kill ();
 		}
 			
-	}
-
-	public struct Resolution {
-		// In Pixels
-		int Width;
-		int Height;
-
-		public Resolution(int width, int height) {
-			this.Width = width;
-			this.Height = height;
-		}
-
-		public override string ToString() {
-			return string.Format ("{0}x{1}", Width, Height);
-		}
 	}
 }
 
