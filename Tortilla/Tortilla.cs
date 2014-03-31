@@ -12,6 +12,20 @@ namespace Makhani.Tortilla
 		public List<string> VideoDevices { get; private set; }
 		public Process FFmpegProcess{ get; private set; }
 
+		enum StreamingMode {
+			UDP,
+			RTP
+		}
+
+		enum AudioCodec {
+			LameMP3,
+			WMA
+		}
+
+		enum VideoCodec {
+			Mpeg4
+		}
+
 		public Tortilla ()
 		{
 			AudioDevices = new List<string> ();
@@ -20,9 +34,9 @@ namespace Makhani.Tortilla
 			UpdateDevices ();
 		}
 
-		public void CaptureLinuxScreen () 
+		public void CaptureLinuxScreen (Resolution inputResolution, int frameRate) 
 		{
-			string args = "-video_size 1024x768 -framerate 25 -f x11grab -i :0.0+100,200 -f alsa -ac 2 -i pulse output.flv";
+			string args = string.Format("-video_size {0} -framerate {1} -f x11grab -i :0.0+100,200 -f alsa -ac 2 -i pulse output.flv", inputResolution, frameRate.ToString());
 			FFmpegProcess = FFmpegManager.RunFFmpegProcess(args, OnDataReceived);
 		}
 
@@ -32,16 +46,26 @@ namespace Makhani.Tortilla
 			FFmpegProcess = FFmpegManager.RunFFmpegProcess(args, OnDataReceived);
 		}
 
+		public void StreamWindowsScreenToIp (string videoDeviceName, string audioDeviceName, string ip, StreamingMode mode, int frameRate = 25, int quality = 20) 
+		{
+			string input = string.Format(
+				"-f dshow  -i video=\"{0}\":audio=\"{1}\" -r {2} -vcodec mpeg4 -q {3} -acodec libmp3lame -ab 128k",
+				videoDeviceName, audioDeviceName, frameRate.ToString(), quality.ToString()
+			);
+			string output = string.Format ("-f mpegts udp://{0}:6666?pkt_size=188?buffer_size=65535", ip);
+
+			string args = input + " " + output;
+
+			FFmpegProcess = FFmpegManager.RunFFmpegProcess(args, OnDataReceived);
+		}
+
 		public void StreamVideoToUrl(string url, Resolution inputResolution, Resolution outputResolution) 
 		{
-			// ffmpeg -f dshow -i video="screen-capture-recorder":audio="Stereo Mix (IDT High Definition)" -vcodec libx264 -preset ultrafast -tune zerolatency -r 10 -async 1 -acodec libmp3lame -ab 24k -ar 22050 -bsf:v h264_mp4toannexb -maxrate 750k -bufsize 3000k -f mpegts udp://192.168.5.215:48550
-
+			// -preset ultrafast -tune zerolatency TODO: Checken!
 			string args = 
 				string.Format(
 					"-f x11grab -s {0} -r 15 -i :0.0 -c:v libx264 -preset fast -pix_fmt yuv420p -s {1} -threads 0 -f flv \"{2}\"", 
-					inputResolution,
-					outputResolution,
-					url
+					inputResolution, outputResolution, url
 				);
 			FFmpegProcess = FFmpegManager.RunFFmpegProcess(args, OnDataReceived);
 		}
