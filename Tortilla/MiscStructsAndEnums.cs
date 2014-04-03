@@ -13,9 +13,9 @@ namespace Makhani.Tortilla
 	}
 
 	public enum VideoCodec {
-		Mpeg4
+		Mpeg4,
+		x264
 	}
-
 
 	/// <summary>
 	/// A screen resolution consisting of height and width.
@@ -34,5 +34,6 @@ namespace Makhani.Tortilla
 			return string.Format ("{0}x{1}", Width, Height);
 		}
 	}
+
 }
 

@@ -73,13 +73,25 @@ namespace Makhani.Tortilla
 		/// <param name="mode">Streaming mode.</param>
 		/// <param name="frameRate">Desired frame rate.</param>
 		/// <param name="quality">Quality of compression.</param>
-		public async Task<bool> StreamWindowsScreenToIpAsync (string videoDeviceName, string audioDeviceName, string ip, StreamingMode mode, int frameRate = 25, int quality = 20) 
+		public async Task<bool> StreamWindowsScreenToIpAsync (string videoDeviceName, string audioDeviceName, string ip, string port, VideoCodec vcodec, AudioCodec acodec, StreamingMode mode, int frameRate, Resolution outputSize, string videoExtras, int quality = 20) 
 		{
-			string input = string.Format(
-				"-f dshow  -i video=\"{0}\":audio=\"{1}\" -r {2} -vcodec mpeg4 -q {3} -acodec libmp3lame -ab 128k",
-				videoDeviceName, audioDeviceName, frameRate.ToString(), quality.ToString()
+			// TODO: -b for bitrate
+			string input = string.Format (
+				"-f dshow  -i video=\"{0}\":audio=\"{1}\" -r {2} -async 1 -vcodec {3} {4} -q {5} -s {6} -maxrate 750k -bufsize 3000k -acodec {7} -ab 128k",
+				videoDeviceName, 
+				audioDeviceName, 
+				frameRate.ToString(), 
+				FFmpegManager.GetCodecName(vcodec), 
+				videoExtras,
+				quality.ToString(),
+				outputSize,
+				FFmpegManager.GetCodecName(acodec)		
 			);
-			string output = string.Format ("-f mpegts udp://{0}:6666?pkt_size=188?buffer_size=65535", ip);
+			string output = string.Format (
+				"-f mpegts udp://{0}:{1}?pkt_size=188?buffer_size=10000000?fifo_size=100000", 
+				ip, 
+				port
+			);
 
 			string args = input + " " + output;
 
@@ -197,6 +209,11 @@ namespace Makhani.Tortilla
 				}
 			}
 		}
+
+//		public string GetVideoCodecParams(VideoCodec codec, int frameRate, int quality, string preset, string extra) {
+//			string codecName = FFmpegManager.GetCodecName (codec);
+//			/return string.Format("-vcodec {0} -preset {1} -tune zerolatency -r {3}", codecName);
+//		}
 
 		/// <summary>
 		/// Sends the input to FFmpeg-process.

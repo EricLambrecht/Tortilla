@@ -97,15 +97,34 @@ namespace Makhani.Tortilla
 				} else {
 					return false;
 				}
-				break;
 			case Makhani.Environment.OS.Linux:
 			case Makhani.Environment.OS.Mac:
 			default:
 				return false;
-				break;
 			}
 		}
 
+		public static string GetCodecName(AudioCodec ac) {
+			switch (ac) {
+			case AudioCodec.LameMP3:
+				return "libmp3lame";
+			case AudioCodec.WMA:
+				return "";
+			default:
+				return "";
+			}
+		}
+
+		public static string GetCodecName(VideoCodec vc) {
+			switch (vc) {
+			case VideoCodec.x264:
+				return "libx264";
+			case VideoCodec.Mpeg4:
+				return "mpeg4";
+			default:
+				return "";
+			}
+		}
 	}
 }
 
