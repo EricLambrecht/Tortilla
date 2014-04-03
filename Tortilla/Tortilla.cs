@@ -12,7 +12,7 @@ namespace Makhani.Tortilla
 		public List<string> AudioDevices { get; private set; }
 		public List<string> VideoDevices { get; private set; }
 		public Process FFmpegProcess{ get; private set; }
-		public event DataReceivedEventHandler OutputReceived;
+		public event EventHandler<OutputReceivedEventArgs> OutputReceived;
 
 
 
@@ -88,16 +88,17 @@ namespace Makhani.Tortilla
 
 		public async Task<bool> LogFFmpegOutput() 
 		{
+			string line;
 			var outputStream = FFmpegProcess.StandardError;
 			using (var fileStream = File.Create(Makhani.Environment.ApplicationPath + "\\output.log")) {
 				using (var fileWriter = new StreamWriter (fileStream)) {
-					while (!outputStream.EndOfStream) {
-						string line = outputStream.ReadLine ();
+					while ((line = await outputStream.ReadLineAsync()) != null) {
 						fileWriter.WriteLine (line);
+						OnOutputReceived (line);
 					}
-					return true;
 				}
 			}
+			return true;
 		}
 			
 		// This function is windows only!
@@ -156,19 +157,23 @@ namespace Makhani.Tortilla
 			FFmpegProcess.StandardInput.WriteLine(str);
 		}
 
-		protected void OnDataReceived(object sender, DataReceivedEventArgs received) 
-		{
-			Output.Add (received.Data);
-			DataReceivedEventHandler tmpHandler = OutputReceived;
+		protected void OnOutputReceived(string line) {
+			Output.Add (line);
+			EventHandler<OutputReceivedEventArgs> tmpHandler = OutputReceived;
 			if (tmpHandler != null) {
-				tmpHandler (this, received);
+				tmpHandler (this, new OutputReceivedEventArgs(line));
 			}
 		}
 
-		public void KillProcess(Process process) 
+		protected void OnDataReceived(object sender, DataReceivedEventArgs received) 
 		{
-			process.Dispose ();
-			process.Kill ();
+			OnOutputReceived (received.Data);
+		}
+
+		public void Kill() 
+		{
+			FFmpegProcess.Dispose ();
+			FFmpegProcess.Kill ();
 		}
 			
 	}

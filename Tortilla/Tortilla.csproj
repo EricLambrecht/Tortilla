@@ -38,6 +38,7 @@
     <Compile Include="Tortilla.cs" />
     <Compile Include="FFmpegManager.cs" />
     <Compile Include="MiscStructsAndEnums.cs" />
+    <Compile Include="OutputReceivedEventArgs.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
