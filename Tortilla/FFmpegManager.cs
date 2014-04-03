@@ -38,10 +38,10 @@ namespace Makhani.Tortilla
 				return process;
 			}
 			catch(FileNotFoundException e) {
-				throw new FileNotFoundException (e.Message + " " + path, e);
+				throw new FileNotFoundException ("Cannot find FFmpeg at: " + path, e);
 			}
 			catch(System.ComponentModel.Win32Exception e) {
-				throw new FileNotFoundException (e.Message + " " + path, e);
+				throw new FileNotFoundException ("Cannot find FFmpeg at: " + path, e);
 			}
 		}
 

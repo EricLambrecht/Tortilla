@@ -38,7 +38,6 @@ namespace Makhani.Tortilla
 			AudioDevices = new List<string> ();
 			VideoDevices = new List<string> ();
 			Output = new List<string> ();
-			UpdateDevices ();
 		}
 
 		/// <summary>
@@ -84,7 +83,13 @@ namespace Makhani.Tortilla
 
 			string args = input + " " + output;
 
-			FFmpegProcess = FFmpegManager.GetFFmpegProcess(args);
+			try {
+				FFmpegProcess = FFmpegManager.GetFFmpegProcess(args);
+			}
+			catch(FileNotFoundException e) {
+				throw new FileNotFoundException (e.Message, e);
+			}
+
 			FFmpegProcess.Start ();
 			await Task.Run(() => FFmpegProcess.WaitForExit ());
 			return true;
@@ -140,11 +145,17 @@ namespace Makhani.Tortilla
 		/// This function is Windows-only!
 		/// Updates video and audio devices.
 		/// </summary>
-		protected void UpdateDevices() 
+		public void UpdateDevices() 
 		{
 			//ffmpeg -list_devices true -f dshow -i dummy
 			string args = "-list_devices true -f dshow -i dummy";
-			FFmpegProcess = FFmpegManager.RunFFmpegProcess(args);
+			try {
+				FFmpegProcess = FFmpegManager.RunFFmpegProcess(args);
+			}
+			catch(FileNotFoundException e) {
+				throw new FileNotFoundException (e.Message, e); // TODO: Write more specific custom exception
+			}
+
 			FFmpegProcess.ErrorDataReceived += OnDataReceived;
 			var outputStream = FFmpegProcess.StandardError;
 
