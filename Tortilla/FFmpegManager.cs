@@ -9,12 +9,26 @@ namespace Makhani.Tortilla
 {
 	public static class FFmpegManager
 	{
+		/// <summary>
+		/// The FFmpeg default path. By default this path is relative to the application's executable path, regardless of whether the assembly's location is a different one. 
+		/// </summary>
 		public static string FFmpegDefaultPath = Path.Combine(Makhani.Environment.ApplicationPath, "ffmpeg\\bin");
 
+		/// <summary>
+		/// Runs a FFmpeg process. Uses default path.
+		/// </summary>
+		/// <returns>The FFmpeg process.</returns>
+		/// <param name="arguments">Starting arguments.</param>
 		public static Process RunFFmpegProcess (string arguments) {
 			return RunFFmpegProcess (arguments, FFmpegDefaultPath);
 		}
 
+		/// <summary>
+		/// Runs a FFmpeg process.
+		/// </summary>
+		/// <returns>The FFmpeg process.</returns>
+		/// <param name="arguments">Starting arguments.</param>
+		/// <param name="path">Path to FFmpeg.</param>
 		public static Process RunFFmpegProcess (string arguments, string path)
 		{
 			try {
@@ -31,10 +45,21 @@ namespace Makhani.Tortilla
 			}
 		}
 
+		/// <summary>
+		/// Gets a unstarted FFmpeg process. Uses default path.
+		/// </summary>
+		/// <returns>The FFmpeg process.</returns>
+		/// <param name="arguments">Starting arguments.</param>
 		public static Process GetFFmpegProcess (string arguments) {
 			return GetFFmpegProcess (arguments, FFmpegDefaultPath);
 		}
 
+		/// <summary>
+		/// Gets a unstarted FFmpeg process.
+		/// </summary>
+		/// <returns>The FFmpeg process.</returns>
+		/// <param name="arguments">Starting arguments.</param>
+		/// <param name="path">Path to FFmpeg.</param>
 		public static Process GetFFmpegProcess (string arguments, string path)
 		{
 			try {
@@ -59,6 +84,10 @@ namespace Makhani.Tortilla
 			}
 		}
 
+		/// <summary>
+		/// Determines if FFmpeg is installed on the current system.
+		/// </summary>
+		/// <returns><c>true</c> if it's installed; otherwise, <c>false</c>.</returns>
 		public static bool IsInstalled() {
 			switch (Makhani.Environment.GetOS ()) {
 			case Makhani.Environment.OS.Win:

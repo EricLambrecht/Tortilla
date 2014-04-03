@@ -6,6 +6,9 @@ namespace Makhani
 {
 	public static class Environment
 	{
+		/// <summary>
+		/// Path to the application that runs this assembly.
+		/// </summary>
 		public static string ApplicationPath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
 		public enum OS
@@ -15,6 +18,10 @@ namespace Makhani
 			Mac
 		}
 
+		/// <summary>
+		/// Gets the current platform.
+		/// </summary>
+		/// <returns>The platform that this assembly is running on.</returns>
 		public static OS GetOS()
 		{
 			switch (System.Environment.OSVersion.Platform)

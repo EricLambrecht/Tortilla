@@ -17,6 +17,9 @@ namespace Makhani.Tortilla
 	}
 
 
+	/// <summary>
+	/// A screen resolution consisting of height and width.
+	/// </summary>
 	public struct Resolution {
 		// In Pixels
 		int Width;
